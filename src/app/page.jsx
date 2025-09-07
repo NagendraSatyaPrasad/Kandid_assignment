@@ -15,10 +15,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table'; // Mocking shadcn/ui table imports
-import { Button } from '../components/ui/button'; // Mocking shadcn/ui button imports
-import { Input } from '../components/ui/input'; // Mocking shadcn/ui input imports
-import { Progress } from '../components/ui/progress'; // Mocking shadcn/ui progress imports
+} from '../components/ui/table';
+import { Button } from '../components/ui/button'; 
+import { Input } from '../components/ui/input';
+import { Progress } from '../components/ui/progress';
 
 // Zustand Store for client-side state management
 const useUIStore = create((set) => ({
@@ -204,7 +204,6 @@ function Sidebar() {
       {isSidebarOpen && (
   <div className="absolute bottom-4 left-4 right-4 flex items-center justify-center p-2 rounded-xl bg-white border border-gray-200 shadow-sm">
     <button className="flex w-full items-center space-x-2">
-      {/* Initials circle */}
       <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-black-600 font-bold">
         NP
       </div>
@@ -238,6 +237,7 @@ function Sidebar() {
     </aside>
   );
 }
+
 // Table Row for Leads
 const LeadRow = ({ lead, onClick }) => {
   // Status colors and icons
@@ -1585,22 +1585,26 @@ const App = () => {
   const { isSidebarOpen, activePage, isAuthModalOpen, closeAuthModal, isLoggedIn, login, logout, toggleSidebar } = useUIStore();
 
   const renderPage = () => {
-    switch (activePage) {
-      case 'Dashboard':
-        return <DashboardPage />;
-      case 'Leads':
-        return <LeadsPage />;
-      case 'Campaigns':
-        return <CampaignsPage />;
-      default:
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold">Dashboard</h1>
-            <p className="mt-4 text-gray-600">This is a placeholder for the Dashboard page.</p>
-          </div>
-        );
-    }
-  };
+  switch (activePage) {
+    case 'Dashboard':
+      return <DashboardPage />;
+    case 'Leads':
+      return <LeadsPage />;
+    case 'Campaigns':
+      return <CampaignsPage />;
+    // Remove any pages that don't exist
+    default:
+      // Dynamic placeholder for any page without a component
+      return (
+        <div className="p-6">
+          <h1 className="text-2xl font-bold">{activePage}</h1>
+          <p className="mt-4 text-gray-600">
+            This is a placeholder for the {activePage} page.
+          </p>
+        </div>
+      );
+  }
+};
 
   // If the user is not logged in, show the AuthModal.
   if (!isLoggedIn) {
