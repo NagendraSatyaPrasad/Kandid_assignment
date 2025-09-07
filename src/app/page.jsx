@@ -5,7 +5,6 @@ import {Clock, UserPlus, Send, Ban, CircleCheck, Megaphone, Trash2, Users, Circl
 // described in the video and PDF. A real Next.js application would
 // separate these components into different files and use Server Actions,
 // a database (PostgreSQL with Drizzle ORM), and TanStack Query for data fetching.
-
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { create } from 'zustand';
 import {
@@ -325,225 +324,169 @@ function LeadSideSheet({ lead, onClose }) {
 
   const [showProfileInfo, setShowProfileInfo] = useState(false);
 
-  // Status color + icon mapping
   const getStatusColor = (status) => {
     if (status.includes("Pending"))
-      return {
-        color: "bg-purple-100 text-purple-800",
-        icon: <Clock className="w-3 h-3 inline mr-1" />,
-      };
+      return { color: "bg-purple-100 text-purple-800", icon: <Clock className="w-3 h-3 inline mr-1" /> };
     if (status.includes("Sent"))
-      return {
-        color: "bg-orange-100 text-orange-800",
-        icon: <Send className="w-3 h-3 inline mr-1" />,
-      };
+      return { color: "bg-orange-100 text-orange-800", icon: <Send className="w-3 h-3 inline mr-1" /> };
     if (status.includes("Followup"))
-      return {
-        color: "bg-blue-100 text-blue-800",
-        icon: <UserPlus className="w-3 h-3 inline mr-1" />,
-      };
+      return { color: "bg-blue-100 text-blue-800", icon: <UserPlus className="w-3 h-3 inline mr-1" /> };
     if (status.includes("Do Not Contact"))
-      return {
-        color: "bg-gray-200 text-black",
-        icon: <Ban className="w-3 h-3 inline mr-1" />,
-      };
+      return { color: "bg-gray-200 text-black", icon: <Ban className="w-3 h-3 inline mr-1" /> };
     if (status.includes("Connected"))
-      return {
-        color: "bg-green-100 text-green-800",
-        icon: <CircleCheck className="w-3 h-3 inline mr-1" />,
-      };
+      return { color: "bg-green-100 text-green-800", icon: <CircleCheck className="w-3 h-3 inline mr-1" /> };
     return { color: "bg-red-100 text-red-800", icon: null };
   };
 
   const status = getStatusColor(lead.status);
 
   return (
-  <div className="fixed inset-y-0 right-0 z-40 w-full max-w-lg bg-white border-l shadow-lg transition-transform duration-300 transform translate-x-0">
-    {/* Header */}
-    <div className="flex justify-between items-center p-4 border-b">
-      <h2 className="text-xl font-semibold">Lead Profile</h2>
-      <Button variant="ghost" onClick={onClose}>
-        &times;
-      </Button>
-    </div>
+    <>
+      {/* Gradient overlay */}
+<div
+  className="fixed inset-0 bg-gradient-to-r from-black/75 via-black/75 to-black/75 z-30"
+  onClick={onClose}
+/>
+      {/* Side sheet */}
+      <div className="fixed inset-y-0 right-0 z-40 w-full max-w-lg bg-white border-l shadow-lg transition-transform duration-300 transform translate-x-0">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-xl font-semibold">Lead Profile</h2>
+          <Button variant="ghost" onClick={onClose}>
+            &times;
+          </Button>
+        </div>
 
-    <div className="p-4 space-y-4 overflow-y-auto h-[calc(100vh-64px)]">
-      {/* Profile Box (Merged with Additional Profile Info) */}
-      <div className="border rounded-lg p-4 shadow-sm space-y-4">
-        {/* Profile Info + Trash Icon */}
-        <div className="flex items-center space-x-4">
-          <img
-            src={lead.detailedInfo.profilePicture}
-            alt="Profile"
-            className="w-16 h-16 rounded-full"
-          />
-          <div className="flex justify-between items-start w-full">
-            <div>
-              <div className="font-semibold text-lg">{lead.name}</div>
-              <div className="text-sm text-gray-500">
-                {lead.detailedInfo.title} at {lead.company}
-              </div>
-              <div className="text-sm text-gray-500">
-                {lead.detailedInfo.location}
+        <div className="p-4 space-y-4 overflow-y-auto h-[calc(100vh-64px)]">
+          {/* Profile Box + Additional Info */}
+          <div className="border rounded-lg p-4 shadow-sm space-y-4">
+            <div className="flex items-center space-x-4">
+              <img
+                src={lead.detailedInfo.profilePicture}
+                alt="Profile"
+                className="w-16 h-16 rounded-full"
+              />
+              <div className="flex justify-between items-start w-full">
+                <div>
+                  <div className="font-semibold text-lg">{lead.name}</div>
+                  <div className="text-sm text-gray-500">{lead.detailedInfo.title} at {lead.company}</div>
+                  <div className="text-sm text-gray-500">{lead.detailedInfo.location}</div>
+                </div>
+                <Button variant="ghost" onClick={() => console.log("Delete lead")}>
+                  <Trash2 className="w-5 h-5 text-red-600" />
+                </Button>
               </div>
             </div>
-            <Button variant="ghost" onClick={() => console.log("Delete lead")}>
-              <Trash2 className="w-5 h-5 text-red-600" />
-            </Button>
+
+            {/* Campaign + Status */}
+            <div className="flex items-center space-x-2">
+              <span className="flex items-center space-x-1 text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                <Megaphone className="h-3 w-3 text-gray-500" />
+                <span>{lead.campaign}</span>
+              </span>
+
+              <span className={`flex items-center text-xs px-2 py-1 rounded-full font-medium ${status.color}`}>
+                {status.icon}
+                {lead.status}
+              </span>
+            </div>
+
+            {/* Collapsible Additional Info */}
+            <div>
+              <button
+                className="w-full flex justify-between items-center px-4 py-3 text-left"
+                onClick={() => setShowProfileInfo(!showProfileInfo)}
+              >
+                <h3 className="font-semibold">Additional Profile Info</h3>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-4 w-4 text-gray-500 transform transition-transform duration-200 ${
+                    showProfileInfo ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showProfileInfo && (
+                <div className="px-4 pb-4">
+                  <p className="text-sm text-gray-600">This section contains more detailed information about the lead.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Interaction History */}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Interaction History</h3>
+            <div className="relative ml-6">
+              {lead.detailedInfo.history.map((interaction, index) => {
+                const stepName = interaction.type;
+
+                let completedSteps = [];
+                if (lead.status.includes("Connected")) {
+                  completedSteps = ["Invitation Request", "Connection Status", "Connection Acceptance Message"];
+                } else if (lead.status.includes("Pending")) {
+                  completedSteps = ["Invitation Request", "Connection Status", "Connection Acceptance Message", "Follow-Up 1"];
+                } else if (lead.status.includes("Sent")) {
+                  completedSteps = ["Invitation Request"];
+                }
+
+                const isStepCompleted = completedSteps.includes(stepName);
+                const isLastStep = index === lead.detailedInfo.history.length - 1;
+                const nextStepCompleted =
+                  !isLastStep && completedSteps.includes(lead.detailedInfo.history[index + 1].type);
+
+                return (
+                  <div key={index} className="relative flex items-start space-x-3">
+                    <div className="relative flex flex-col items-center">
+                      {isStepCompleted ? (
+                        <CircleCheck className="w-6 h-6 text-blue-600 z-10 bg-white rounded-full" />
+                      ) : (
+                        <svg
+                          width="28"
+                          height="28"
+                          viewBox="0 0 150 150"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-6 h-6 text-gray-500 z-10 bg-white rounded-full"
+                        >
+                          <circle cx="75" cy="75" r="70" stroke="black" strokeWidth="8" />
+                          <circle cx="75" cy="75" r="15" stroke="black" strokeWidth="8" />
+                          <line x1="25" y1="75" x2="60" y2="75" stroke="black" strokeWidth="8" strokeLinecap="round" />
+                          <line x1="90" y1="75" x2="125" y2="75" stroke="black" strokeWidth="8" strokeLinecap="round" />
+                        </svg>
+                      )}
+
+                      {!isLastStep && (
+                        <div
+                          className={`absolute top-6 left-1/2 -translate-x-1/2 w-0.5 ${
+                            isStepCompleted && nextStepCompleted ? "bg-blue-600" : "bg-gray-300"
+                          }`}
+                          style={{ height: "calc(100% + 1.5rem)" }}
+                        />
+                      )}
+                    </div>
+
+                    <div className="pb-8">
+                      <span className={`text-sm font-medium ${isStepCompleted ? "text-blue-600" : "text-gray-700"}`}>
+                        {interaction.type}
+                      </span>
+                      <span className="block text-xs text-gray-500">{interaction.timestamp}</span>
+                      <p className="text-sm text-gray-600">{interaction.message}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-
-        {/* Campaign Name + Status Row */}
-        <div className="flex items-center space-x-2">
-          <span className="flex items-center space-x-1 text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-            <Megaphone className="h-3 w-3 text-gray-500" />
-            <span>{lead.campaign}</span>
-          </span>
-
-          <span
-            className={`flex items-center text-xs px-2 py-1 rounded-full font-medium ${status.color}`}
-          >
-            {status.icon}
-            {lead.status}
-          </span>
-        </div>
-
-        {/* Collapsible Additional Profile Info */}
-        <div>
-          <button
-            className="w-full flex justify-between items-center px-4 py-3 text-left"
-            onClick={() => setShowProfileInfo(!showProfileInfo)}
-          >
-            <h3 className="font-semibold">Additional Profile Info</h3>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className={`h-4 w-4 text-gray-500 transform transition-transform duration-200 ${
-                showProfileInfo ? "rotate-180" : ""
-              }`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          {showProfileInfo && (
-            <div className="px-4 pb-4">
-              <p className="text-sm text-gray-600">
-                This section contains more detailed information about the lead.
-              </p>
-            </div>
-          )}
-        </div>
       </div>
-
-      {/* Interaction History */}
-      <div className="space-y-4">
-        <h3 className="font-semibold">Interaction History</h3>
-        <div className="relative ml-6">
-          {lead.detailedInfo.history.map((interaction, index) => {
-            const stepName = interaction.type;
-
-            let completedSteps = [];
-            if (lead.status.includes("Connected")) {
-              completedSteps = [
-                "Invitation Request",
-                "Connection Status",
-                "Connection Acceptance Message",
-              ];
-            } else if (lead.status.includes("Pending")) {
-              completedSteps = [
-                "Invitation Request",
-                "Connection Status",
-                "Connection Acceptance Message",
-                "Follow-Up 1",
-              ];
-            } else if (lead.status.includes("Sent")) {
-              completedSteps = ["Invitation Request"];
-            }
-
-            const isStepCompleted = completedSteps.includes(stepName);
-            const isLastStep = index === lead.detailedInfo.history.length - 1;
-            const nextStepCompleted =
-              !isLastStep &&
-              completedSteps.includes(lead.detailedInfo.history[index + 1].type);
-
-            return (
-              <div key={index} className="relative flex items-start space-x-3">
-                <div className="relative flex flex-col items-center">
-                  {isStepCompleted ? (
-                    <CircleCheck className="w-6 h-6 text-blue-600 z-10 bg-white rounded-full" />
-                  ) : (
-                    <svg
-                      width="28"
-                      height="28"
-                      viewBox="0 0 150 150"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-6 h-6 text-gray-500 z-10 bg-white rounded-full"
-                    >
-                      <circle cx="75" cy="75" r="70" stroke="black" strokeWidth="8" />
-                      <circle cx="75" cy="75" r="15" stroke="black" strokeWidth="8" />
-                      <line
-                        x1="25"
-                        y1="75"
-                        x2="60"
-                        y2="75"
-                        stroke="black"
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                      />
-                      <line
-                        x1="90"
-                        y1="75"
-                        x2="125"
-                        y2="75"
-                        stroke="black"
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  )}
-
-                  {!isLastStep && (
-                    <div
-                      className={`absolute top-6 left-1/2 -translate-x-1/2 w-0.5 ${
-                        isStepCompleted && nextStepCompleted
-                          ? "bg-blue-600"
-                          : "bg-gray-300"
-                      }`}
-                      style={{ height: "calc(100% + 1.5rem)" }}
-                    />
-                  )}
-                </div>
-
-                <div className="pb-8">
-                  <span
-                    className={`text-sm font-medium ${
-                      isStepCompleted ? "text-blue-600" : "text-gray-700"
-                    }`}
-                  >
-                    {interaction.type}
-                  </span>
-                  <span className="block text-xs text-gray-500">
-                    {interaction.timestamp}
-                  </span>
-                  <p className="text-sm text-gray-600">{interaction.message}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  </div>
-);
+    </>
+  );
 }
 
 // Leads Page Component
@@ -658,28 +601,25 @@ const LeadsPage = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Leads</h1>
         <div className="flex space-x-2">
-          <Input placeholder="Search leads..." className="w-[300px]" />
-          <Button variant="outline">Filter</Button>
         </div>
       </div>
       <div className="overflow-x-auto rounded-lg border">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Campaign Name</TableHead>
-              <TableHead className="text-center">Activity</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {leads.map((lead) => (
-              <LeadRow key={lead.id} lead={lead} onClick={setSelectedLead} />
-            ))}
-          </TableBody>
-        </Table>
+        <Table className="min-w-full bg-white">
+  <TableHeader className="bg-white">
+    <TableRow>
+      <TableHead className="bg-white">Name</TableHead>
+      <TableHead className="bg-white">Campaign Name</TableHead>
+      <TableHead className="text-center bg-white">Activity</TableHead>
+      <TableHead className="bg-white">Status</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody className="bg-white">
+    {leads.map((lead) => (
+      <LeadRow key={lead.id} lead={lead} onClick={setSelectedLead} />
+    ))}
+  </TableBody>
+</Table>
            {isLoading && (
           <div className="text-center p-4">
             <svg
@@ -1091,41 +1031,41 @@ const CampaignsPage = () => {
           </p>
 
           {!selectedCampaign && (
-            <div className="inline-flex rounded-md shadow-sm mt-3 border">
-              <Button
-                size="sm"
-                onClick={() => setFilter("All")}
-                className={`rounded-l-md border-r ${
-                  filter === "All"
-                    ? "bg-white text-gray-900 font-semibold"
-                    : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900"
-                }`}
-              >
-                All Campaigns
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setFilter("Active")}
-                className={`border-r ${
-                  filter === "Active"
-                    ? "bg-white text-gray-900 font-semibold"
-                    : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900"
-                }`}
-              >
-                Active
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setFilter("Inactive")}
-                className={`rounded-r-md ${
-                  filter === "Inactive"
-                    ? "bg-white text-gray-900 font-semibold"
-                    : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900"
-                }`}
-              >
-                Inactive
-              </Button>
-            </div>
+            <div className="inline-flex rounded-md shadow-sm mt-3 border bg-gray-100">
+  <Button
+    size="sm"
+    onClick={() => setFilter("All")}
+    className={`rounded-l-md border-r ${
+      filter === "All"
+        ? "bg-white text-gray-900 font-semibold shadow-sm"
+        : "bg-transparent text-gray-600 hover:bg-gray-200"
+    }`}
+  >
+    All Campaigns
+  </Button>
+  <Button
+    size="sm"
+    onClick={() => setFilter("Active")}
+    className={`border-r ${
+      filter === "Active"
+        ? "bg-white text-gray-900 font-semibold shadow-sm"
+        : "bg-transparent text-gray-600 hover:bg-gray-200"
+    }`}
+  >
+    Active
+  </Button>
+  <Button
+    size="sm"
+    onClick={() => setFilter("Inactive")}
+    className={`rounded-r-md ${
+      filter === "Inactive"
+        ? "bg-white text-gray-900 font-semibold shadow-sm"
+        : "bg-transparent text-gray-600 hover:bg-gray-200"
+    }`}
+  >
+    Inactive
+  </Button>
+</div>
           )}
         </div>
 
@@ -1135,7 +1075,6 @@ const CampaignsPage = () => {
               <PlusCircle className="w-4 h-4" />
               Create Campaign
             </Button>
-
             <div className="relative w-[250px]">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input placeholder="Search campaigns..." className="pl-8 w-full" />
@@ -1144,11 +1083,10 @@ const CampaignsPage = () => {
         )}
       </div>
 
-      {/* Main Content */}
       {!selectedCampaign ? (
         // Show Campaigns Table
         <div className="overflow-x-auto rounded-lg border">
-          <Table>
+          <Table className="min-w-full bg-white">
             <TableHeader>
               <TableRow>
                 <TableHead>Campaign Name</TableHead>
@@ -1578,8 +1516,6 @@ const DashboardPage = () => {
     </div>
   );
 };
-
-
 // Main App Component
 const App = () => {
   const { isSidebarOpen, activePage, isAuthModalOpen, closeAuthModal, isLoggedIn, login, logout, toggleSidebar } = useUIStore();
